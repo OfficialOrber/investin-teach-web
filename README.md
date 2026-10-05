@@ -4,6 +4,13 @@ A starter website you can make your own: a personal portfolio to show people, pl
 small web app to learn how interactive pages actually work. Everything you need is
 already here — no accounts, no passwords, no setup beyond two commands.
 
+**Making your own copy:** press the green **Use this template** button at the top of
+this page → **Create a new repository**. Give it a name, and set it to **Public** —
+GitHub's free website hosting does not work on private repos, so choosing Private
+here means you will not be able to put your site online later. Then download your new
+repo to your computer (the green **Code** button → "Open with GitHub Desktop", or
+`git clone` if you know it).
+
 ---
 
 ## 1. What you need
