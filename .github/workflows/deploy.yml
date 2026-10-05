@@ -1,0 +1,83 @@
+# Publishes your site to GitHub Pages every time you push to the main branch.
+#
+# ⚠️ BEFORE THIS CAN WORK: go to your repo on GitHub → Settings → Pages →
+# under "Build and deployment", set Source to "GitHub Actions".
+# If you forget, this workflow fails. Turn it on, then go to the Actions tab
+# and press "Re-run jobs" on the run that failed.
+name: Deploy to GitHub Pages
+
+on:
+  # Run on every push to main.
+  push:
+    branches: [main]
+  # And let you start it by hand from the Actions tab.
+  workflow_dispatch:
+
+# The permissions GitHub Pages needs in order to publish.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If you push twice quickly, let the first deploy finish rather than cancelling it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  # Job 1: build the site into a folder of plain HTML files.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v7
+
+      - name: Install Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install the packages
+        run: npm ci
+
+      - name: Work out which sub-folder the site will live in
+        # A project site lives at https://you.github.io/your-repo-name/, so Next.js
+        # has to know about that "/your-repo-name" part or the styling will 404.
+        # next.config.ts reads it from NEXT_PUBLIC_BASE_PATH, which we set here.
+        # A site named you.github.io is special: it sits at the top, so no prefix.
+        run: |
+          REPO="${GITHUB_REPOSITORY#*/}"
+          if [[ "$REPO" == *.github.io ]]; then
+            echo "NEXT_PUBLIC_BASE_PATH=" >> "$GITHUB_ENV"
+          else
+            echo "NEXT_PUBLIC_BASE_PATH=/$REPO" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build the site
+        run: npm run build
+
+      - name: Add a .nojekyll file
+        # Without this, GitHub Pages hides every folder starting with an underscore,
+        # and all of Next.js's code lives in a folder called _next. Blank page!
+        run: touch out/.nojekyll
+
+      - name: Get Pages ready
+        uses: actions/configure-pages@v6
+
+      - name: Hand the built site to Pages
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: out
+
+  # Job 2: put the built site online.
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
