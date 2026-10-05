@@ -185,26 +185,30 @@ In order of difficulty. Do them in any order you like.
 
 ## 7. When it breaks
 
-Everybody's breaks. These are the usual four.
+Everybody's breaks. These are the usual five.
 
-**`sh: next: command not found`, or a wall of red as soon as you start**
-You have not run `npm install` yet, or it did not finish. Run it again and wait for
-it to stop.
+**`sh: next: command not found`**
+You have not run `npm install` yet, or it stopped half way. Run it again and let it
+finish before you try `npm run dev`.
 
-**`Error: listen EADDRINUSE: address already in use :::3000`**
-Something is already using port 3000 — almost always another `npm run dev` you forgot
-about in a different terminal window. Close it, or run this site on another port:
+**The terminal says `⚠ Port 3000 is in use ... using available port 3001 instead`**
+You already have a site running in another terminal window. Next.js does not argue
+about it — it quietly moves to the next free port. So your site is at
+**http://localhost:3001**, not 3000, and if you open 3000 you will be looking at the
+*other* one and wondering why your changes are not showing up. Always trust the
+`Local:` line the terminal prints — that address is the right one. To tidy up
+instead, find the other terminal and press `Ctrl + C`, or pick a port yourself:
 
 ```bash
-npm run dev -- -p 3001
+npm run dev -- -p 3005
 ```
 
-Then open http://localhost:3001 instead.
-
-**`useState only works in Client Components. Add the "use client" directive...`**
-You used `useState`, `useEffect` or an `onClick` in a page that does not say
-`'use client';` on its very first line. Add it. Those features need the browser, and
-that line is how you tell Next.js this file runs there. See the top of
+**`This API is only available in Client Components. To fix, mark the file (or its
+parent) with the "use client" directive.`**
+You used `useState`, `useEffect` or an `onClick` in a file that does not say
+`'use client';` on its very first line. Add that line and the error goes away. Those
+features need a real browser, and that one line is how you tell Next.js "this file
+runs in the browser, not while the site is being built". See the top of
 `src/app/playground/page.tsx` for an example.
 
 **You changed something and nothing happened**

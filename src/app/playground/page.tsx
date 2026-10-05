@@ -33,7 +33,13 @@ export default function PlaygroundPage() {
      the point: once empty, then again with your saved list. */
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) setTodos(JSON.parse(saved)); // JSON.parse turns saved text back into a list
+    try {
+      // JSON.parse turns the saved text back into a real list.
+      if (saved) setTodos(JSON.parse(saved));
+    } catch {
+      // If the saved text was somehow damaged, start with an empty list
+      // instead of showing a blank broken page.
+    }
     setLoaded(true);
   }, []); // the empty [] means "only once"
   /* eslint-enable react-hooks/set-state-in-effect */
